@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <queue>
 #include <map>
+#include <ctime>
 
 struct ElemInfo
 {
@@ -12,18 +13,46 @@ struct ElemInfo
     int lenToStart = std::numeric_limits<int>::max();
 };
 
-size_t h(char c1, char end)
+size_t h(char c1, char end1)
 {
-    return std::abs(c1 - end);
+    return std::abs(c1 - end1);
+}
+
+void write(char end, char start, std::map<char, ElemInfo>& d)
+{
+    for (auto& i : d)
+    {
+        if (i.first == end && i.second.lenToStart == std::numeric_limits<int>::max())
+        {
+            std::cout << "no way\n";
+            return;
+        }
+    }
+
+    std::string s(1, end);
+    while (true)
+    {
+        if (s.back() == start)
+            break;
+        s += d[s.back()].prev;
+    }
+
+    std::reverse(s.begin(), s.end());
+    std::cout << s;
 }
 
 int main()
 {
+    setlocale(LC_ALL, "Russian");
+
     std::map<char, ElemInfo> d;
 
     char start = 0;
-    char end = 0;
-    std::cin >> start >> end;
+    char end1 = 0;
+    char end2 = 0;
+
+    std::cout << "start end1 end2\n";
+    std::cin >> start >> end1 >> end2;
 
     char p1 = 0;
     char p2 = 0;
@@ -43,7 +72,8 @@ int main()
     for (auto& i : d)
         q.push_back(i.first);
 
-
+    
+    auto t1 = clock();
     while (!q.empty())
     {
         char cur;
@@ -54,10 +84,10 @@ int main()
             if (d[q[i]].lenToStart == std::numeric_limits<int>::max())
                 continue;
 
-            size_t cur_priority = d[q[i]].lenToStart + h(q[i], end);
+            size_t cur_priority = d[q[i]].lenToStart + h(q[i], end1);
             if (cur_priority < min_priority || min_priority == -1)
             {
-                min_priority = d[q[i]].lenToStart + h(q[i], end);
+                min_priority = d[q[i]].lenToStart + h(q[i], end1);
                 eraseInd = i;
                 cur = q[i];
             }
@@ -78,17 +108,15 @@ int main()
             }
         }
     }
+    auto t2 = clock();
 
-    std::string s(1, end);
-    while (true)
-    {
-        if (s.back() == start)
-            break;
-        s += d[s.back()].prev;
-    }
-
-    std::reverse(s.begin(), s.end());
-    std::cout << s;
+    std::cout << "\nВремя работы: ";
+    std::cout << (double)(t2 - t1) / CLOCKS_PER_SEC << "\n";
+    std::cout << "\nДля end1: ";
+    write(end1, start, d);
+    std::cout << "\nДля end2: ";
+    write(end2, start, d);
+    std::cout << "\n\nСложность алгоритма: O(|V|*|V| + |E|) V - мн-во вершин, E - мн-во ребер\n";
 
     return 0;
 }
