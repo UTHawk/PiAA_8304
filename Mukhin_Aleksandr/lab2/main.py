@@ -68,6 +68,9 @@ for end_position in vertexes:
                     path_to[neighbour] = path_length
                     queue.push(neighbour, path_length)
                     came_from[neighbour] = current_element[0]
+                    print("path: ", path_to)
+                    print("came_from: ", came_from)
+                    print()
 
     while same_value_in(came_from):
         del_same_value(came_from, end_position)
