@@ -14,7 +14,7 @@ int main() {
     SetConsoleOutputCP(1251);
 
     std::cout << "Введите длину строны квадрата [2; 40]: ";
-    int n = 0; //Длина стороны квадрата
+    int n = 0;
     std::cin >> n;
     if (std::cin.bad()) {
         std::cout << "\nОшибка ввода";
@@ -25,10 +25,10 @@ int main() {
         exit(1);
     }
 
-    if (isOptimalLength(n)) { //Если можно дать ответ сразу - вызываем соответствующую функцию
+    if (isOptimalLength(n)) {
         optimalSolution(n);
     }
-    else { //Иначе - вызываем менее производительную функцию с бэктрекингом
+    else {
         TableTop tableTop(n);
 
         tableTop.startBacktracking();

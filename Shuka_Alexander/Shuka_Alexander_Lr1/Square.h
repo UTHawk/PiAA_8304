@@ -1,7 +1,7 @@
 #pragma once
 
 
-struct Square  //cтруктура дл¤ хранени¤ единичного квадрата
+struct Square
 {
     Square()
     {
