@@ -7,6 +7,9 @@ struct Square {
     int x, y, size;
 };
 
+class Area;
+void printArea(const Area &area);
+
 struct Area {
     int n;
     Area(int n) : n(n), filled(n, 0) {}
@@ -42,28 +45,54 @@ struct Area {
         for (int i = 0; i < size; i++) {
             filled[topLeftCol + i] += size;
         }
+        if (verboseMode) {
+            std::cout << "Adding square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
+            printArea(*this);
+        }
     }
     void removeSquare(int topLeftCol, int size) {
         for (int i = 0; i < size; i++) {
             filled[topLeftCol + i] -= size;
         }
         squares.pop_back();
+        if (verboseMode) {
+            std::cout << "Removing square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
+            printArea(*this);
+        }
     }
     void saveMinSquares() {
         if (squares.size() < minSquaresAmount) {
             minSquaresAmount = squares.size();
             minSquares = squares;
+            if (verboseMode) {
+                std::cout << "Saving current squares as minimal (" << squares.size() << " squares)." << std::endl;
+            }
         }
     }
 };
+
+void printArea(const Area &area) {
+    std::vector<std::vector<unsigned char>> toPrint(area.n, std::vector<unsigned char>(area.n, '.'));
+    for (auto i = 0; i < area.squares.size(); i++) {
+        auto square = area.squares[i];
+        for (int row = square.y; row < square.y + square.size; row++) {
+            for (int col = square.x; col < square.x + square.size; col++) {
+                toPrint[row][col] = (i < 26 ? 'a' + i : 'A' + (i - 26));
+            }
+        }
+    }
+    for (int row = 0; row < area.n; row++) {
+        for (int col = 0; col < area.n; col++) {
+            std::cout << toPrint[row][col] << ' ';
+        }
+        std::cout << std::endl;
+    }
+}
 
 void printSquares(const std::vector<Square> &squares) {
     std::cout << squares.size() << std::endl;
     for (auto square : squares) {
         std::cout << square.x << " " << square.y << " " << square.size << std::endl;
-    }
-    if (verboseMode) {
-        std::cout << "--------" << std::endl;
     }
 }
 
@@ -108,9 +137,6 @@ void findMinSquaresRecursively(Area &area) {
     int toppestCol = area.getToppestCol();
     if (toppestCol == -1) {
         area.saveMinSquares();
-        if (verboseMode) {
-            printSquares(area.squares);
-        }
         return;
     }
 
