@@ -41,22 +41,26 @@ struct Area {
         return endCol - col;
     }
     void addSquare(int topLeftCol, int size) {
+        if (verboseMode) {
+            std::cout << "Adding square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
+        }
         squares.push_back({topLeftCol, filled[topLeftCol], size});
         for (int i = 0; i < size; i++) {
             filled[topLeftCol + i] += size;
         }
         if (verboseMode) {
-            std::cout << "Adding square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
             printArea(*this);
         }
     }
     void removeSquare(int topLeftCol, int size) {
+        if (verboseMode) {
+            std::cout << "Removing square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
+        }
         for (int i = 0; i < size; i++) {
             filled[topLeftCol + i] -= size;
         }
         squares.pop_back();
         if (verboseMode) {
-            std::cout << "Removing square " << topLeftCol << ' ' << filled[topLeftCol] << ' ' << size << std::endl;
             printArea(*this);
         }
     }
@@ -152,3 +156,4 @@ void findMinSquaresRecursively(Area &area) {
         area.removeSquare(toppestCol, size);
     }
 }
+
