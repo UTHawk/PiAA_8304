@@ -4,7 +4,7 @@ points_x = []
 points_y = []
 
 for i in range(2, 41):
-    with open(f"{i}.txt") as input_file:
+    with open(f"Tests/{i}.txt") as input_file:
         points_x.append(i)
         points_y.append(int(input_file.readline()) / 1000)
 
