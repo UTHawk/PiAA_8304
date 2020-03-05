@@ -13,17 +13,8 @@ int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    std::cout << "Введите длину строны квадрата [2; 40]: ";
     int n = 0;
     std::cin >> n;
-    if (std::cin.bad()) {
-        std::cout << "\nОшибка ввода";
-        exit(1);
-    }
-    if (n < 2 || n > 40) {
-        std::cout << "\nОшибка ввода";
-        exit(1);
-    }
 
     if (isOptimalLength(n)) {
         optimalSolution(n);
