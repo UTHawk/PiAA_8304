@@ -9,7 +9,7 @@ struct coord {
 	int len;
 };
 
-void solve(std::vector<std::vector<int>>& rectangle, std::vector<coord>& potential, std::vector<coord>& answer, int min, int x, int y){
+void solve(std::vector<std::vector<int>>& rectangle, std::vector<coord>& potential, std::vector<coord>& answer, int min, int x, int y, int& count){
 	coord point;
 	bool check = false;
 	for (int i = 0; i < x; ++i){
@@ -24,6 +24,7 @@ void solve(std::vector<std::vector<int>>& rectangle, std::vector<coord>& potenti
 			break;
 	}
 	if (check == false){
+		count += 1;
 		answer = potential;
 		return;
 	}
@@ -41,12 +42,11 @@ void solve(std::vector<std::vector<int>>& rectangle, std::vector<coord>& potenti
 				rectangle[i][j] = 1;
 		point.len = size;
 		potential.push_back(point);
-		solve(rectangle, potential, answer, min, x, y);
+		solve(rectangle, potential, answer, min, x, y, count);
 		for (int i = point.x; i < point.x + size; ++i)
 			for (int j = point.y; j < point.y + size; ++j)
 				rectangle[i][j] = 0;
 		potential.pop_back();
-
 	}
 }
 
@@ -54,9 +54,17 @@ int main(){
 	int x = 0;
 	std::cout << "x = ";
 	std::cin >> x;
+	if (x < 2) {
+		std::cout << "Wrong Input!" << std::endl;
+		return 0;
+	}
 	std::cout << "\ny = ";
 	int y = 0;
 	std::cin >> y;
+	if (y < 2) {
+		std::cout << "Wrong Input!" << std::endl;
+		return 0;
+	}
 	int min = 0;
 	int max = 0;
 	if (y > x) {
@@ -73,11 +81,15 @@ int main(){
 		rectangle[i] = side;
 	}
 	std::vector<coord> potential;
-	std::vector<coord> answer(x * y);
+	std::vector<coord> answer(x * y + 1);
+	int count = 0;
 	clock_t time = clock();
-	solve(rectangle, potential, answer, min, x, y);
+	solve(rectangle, potential, answer, min, x, y, count);
 	time = clock() - time;
-	std::cout << answer.size() << "\n";
+	std::cout << "Time: ";
+	std::cout << (double)(time) / CLOCKS_PER_SEC << std::endl;
+	std::cout << "Count: " << count << std::endl;
+	std::cout << "Pieces: " << answer.size() << std::endl;
 	for (size_t i = 0; i < answer.size(); ++i)
 		std::cout << answer[i].x
 		<< " " <<
@@ -85,6 +97,5 @@ int main(){
 		<< " " <<
 		answer[i].len
 		<< std::endl;
-	std::cout << (double)(time) / CLOCKS_PER_SEC;
 	return 0;
 }
