@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <algorithm>
 #include <ctime>
 
 struct coord {
