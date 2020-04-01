@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -24,7 +24,7 @@ int shift()
     std::cin >> s;
     size_t start_size = s.size();
 
-    std::vector<size_t> pi(s.size() * 2);
+    std::vector<size_t> pi(s.size());
     prefixx(s, pi);
 
     char c;
@@ -42,25 +42,22 @@ int shift()
 
         if (s[j] == c)
             ++j;
-
-        pi[start_size + j] = j;
         ++text_ind;
+       
+        s += c;
     }
-
     if (is_same)
         return 0;
-    if (text_ind != start_size - 1)
+    if (text_ind != start_size)
         return -1;
 
-
-    size_t ind = pi[pi.size() - 1];
-    for (int i = ind; i < start_size; ++i)
+    for (int i = j; i < start_size; ++i)
     {
-        if (s[i] != s[i + start_size - ind])
+        if (s[i] != s[i + start_size - j])
             return -1;
     }
 
-    return start_size - ind;
+    return j;
 }
 
 int main()
