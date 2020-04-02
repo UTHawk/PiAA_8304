@@ -61,6 +61,7 @@ VertexI* vertexWithMinF(std::set<VertexI*> open) {
 }
 
 std::string printResA(VertexI* end, std::map<VertexI*, VertexI*> from){
+    std::cout << "Результат:\n";
     std::string res = "";
 
     std::stack<int> stack;
@@ -90,9 +91,24 @@ std::string printResA(VertexI* end, std::map<VertexI*, VertexI*> from){
     return res;
 }
 
+void printSet(std::set<VertexI*> open, std::set<VertexI*> closed, std::map<VertexI*, VertexI*> from){
+    std::cout << "Предстоит раскрыть:\n";
+    for(auto i : open) std::cout << i->name << " " ;
+    std::cout << std::endl;
+    std::cout << "Обработанные вершины:\n";
+    for(auto i : closed) std::cout << i->name << " " ;
+    std::cout << std::endl;
+     std::cout << "Множество необходимых вершин:\n";
+    std::map<VertexI*, VertexI*>::iterator it;
+    for (it = from.begin();it!=from.end(); it++){
+        std::cout<< it->first->name << " " << it->second->name;
+        std::cout << std::endl;
+    }
+}
+
 std::string aStar(VertexI* start, VertexI* end) {
-    std::set<VertexI*> open; //раскрыты
-    std::set<VertexI*> closed; //нужно обработать
+    std::set<VertexI*> open; //Предстоит раскрыть
+    std::set<VertexI*> closed; //Обработанные
     std::map<VertexI*, VertexI*> from; //необходимые
     //заполняем св-ва вершины старт
     start->g = 0; //стоимость пути от начальной
@@ -101,6 +117,8 @@ std::string aStar(VertexI* start, VertexI* end) {
     open.insert(start); //обработана
 
     while (!open.empty()) {
+        printSet(open, closed, from);
+
         VertexI* current = vertexWithMinF(open); //вершина с самой низкой оценкой
 
         if (current == end) {
@@ -111,11 +129,11 @@ std::string aStar(VertexI* start, VertexI* end) {
         closed.insert(current); //доб. в список обработанных
 
         for (auto child : current->children) { //проверяем каждого соседа
-            if (closed.find(current) != closed.end()) {
-                double tmpChildG = current->g + child->cost;
+            if (closed.find(current) != closed.end()) { //не раскрытые
+                double tmpChildG = current->g + child->cost; //предварительная оценка
 
-                if (child->child->g > tmpChildG || closed.find(child->child) == closed.end())  {
-                    from[child->child] = current;
+                if (child->child->g > tmpChildG || closed.find(child->child) == closed.end())  { //если лучший вар. (стоимю пути меньше, открытый)
+                    from[child->child] = current;  //обновление св-в
                     child->child->g = tmpChildG;
                     child->child->f = child->child->g + h(child->child, end);
 
@@ -124,12 +142,12 @@ std::string aStar(VertexI* start, VertexI* end) {
                     }
                 }
             }
-
-
         }
+
     }
     return "Путь не найден";
 }
+
 
 
 /*
@@ -293,5 +311,5 @@ int main(){
     //std::string way = greedy(start,end);
     std::string way = aStar(start, end);
 
-    std::cout << way;
+    std::cout << way << std::endl;
 }
