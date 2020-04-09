@@ -3,6 +3,11 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <fstream>
+
+constexpr bool f = true;
+constexpr const char* PATH_IN = "D:/test.txt";
+constexpr const char* PATH_OUT = "D:/result.txt";
 
 struct elem {
     std::vector<std::pair<char, int>> ways;
@@ -42,7 +47,7 @@ std::string RECONSTRUCT_PATH(std::map<char,char> & from,char start, char where) 
     return path;
 }
 
-void findWay(char start, char end1, char end2, std::map<char, elem>& my_map) {
+void findWay(char start, char end1, char end2, std::map<char, elem>& my_map, std::ostream & out) {
     char curr = start;
     std::set<char> closed;
     std::set<char> open = {start};
@@ -50,11 +55,20 @@ void findWay(char start, char end1, char end2, std::map<char, elem>& my_map) {
     while(!open.empty()) {
         curr = MIN_F(open,end1,my_map);
 
+        if(f){
+            std::cout << std::endl << "Current vertex: " << curr << std::endl;
+            std::cout << "Open: ";
+            for(auto i:open ) std::cout << i;
+            std::cout << std::endl << "Closed: ";
+            for(auto i:closed) std::cout << i;
+            std::cout << std::endl;
+        }
+
         if(curr == end1){
-            std::cout << RECONSTRUCT_PATH(from, start, end1) << std::endl;
+            out << RECONSTRUCT_PATH(from, start, end1) << std::endl;
 
             if(from.find(end2) != from.end())
-                std::cout << RECONSTRUCT_PATH(from, start, end2) << std::endl;
+                out << RECONSTRUCT_PATH(from, start, end2) << std::endl;
             return;
         }
         open.erase(curr);
@@ -81,17 +95,62 @@ void findWay(char start, char end1, char end2, std::map<char, elem>& my_map) {
     std::cout << "No way" << std::endl;
 }
 
-int main() {
-    char start, end1, end2;
-    std::cin >> start >> end1 >> end2;
+void read(std::istream & in, char& start, char& end1, char& end2, std::map<char, elem>& my_map) {
+    in >> start >> end1 >> end2;
     char a, b;
     float c = 0;
-    std::map<char, elem> my_map;
-    while(std::cin >> a >> b >> c) {
+    while(in >> a >> b >> c) {
         if(c == -1) break;
         my_map[a].ways.push_back({b,c});
         std::sort(my_map[a].ways.begin(),my_map[a].ways.end(), cmp);
     }
-    findWay(start, end1, end2, my_map);
+}
+
+int main() {
+    char start, end1, end2;
+    int choseIn, choseOut;
+    std::map<char, elem> my_map;
+    std::cout << "Input: 1 - console, 0 - file" << std::endl;
+    std::cin >> choseIn;
+    if(choseIn!=0 && choseIn!=1) {
+        std::cout << "Wrong chose Input";
+        return 0;
+    }
+    std::cout << "Output: 1 - console, 0 - file" << std::endl;
+    std::cin >> choseOut;
+    if(choseOut!=0 && choseOut!=1) {
+        std::cout << "Wrong chose Output";
+        return 0;
+    }
+    if(choseIn == 1) {
+        read(std::cin, start, end1, end2, my_map);
+    }
+    else{
+        std::ifstream file;
+        file.open(PATH_IN);
+
+        if (!file.is_open()) {
+            std::cout << "Can't open file!\n";
+            return 0;
+        }
+        else {
+            read(file,start,end1,end2,my_map);
+        }
+    }
+    if(choseOut == 1) {
+        findWay(start, end1, end2, my_map, std::cout);
+    }
+    else {
+        std::ofstream file;
+        file.open(PATH_OUT);
+
+        if (!file.is_open()) {
+            std::cout << "Can't open file!\n";
+            return 0;
+        }
+        else {
+            findWay(start, end1, end2, my_map, file);
+        }
+    }
     return 0;
 }
