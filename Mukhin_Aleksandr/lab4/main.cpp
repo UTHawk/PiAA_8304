@@ -34,7 +34,7 @@ void KMP(std::istream& input, std::ostream& output) noexcept {
     size_t counter = 0;
     input.get();
     input.get(tmp);
-    while(input.peek() != EOF) {
+    while(input.peek() != EOF && input.peek() != '\n') {
         while (pattern[j] == tmp) {                                            // пока символы совпадают продолжаем сравнение
             input.get(tmp);
             ++j;
