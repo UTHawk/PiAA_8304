@@ -56,12 +56,12 @@ void findWay(char start, char end1, char end2, std::map<char, elem>& my_map, std
         curr = MIN_F(open,end1,my_map);
 
         if(f){
-            std::cout << std::endl << "Current vertex: " << curr << std::endl;
-            std::cout << "Open: ";
-            for(auto i:open ) std::cout << i;
-            std::cout << std::endl << "Closed: ";
-            for(auto i:closed) std::cout << i;
-            std::cout << std::endl;
+            out << std::endl << "Current vertex: " << curr << std::endl;
+            out << "Open: ";
+            for(auto i:open ) out << i;
+            out << std::endl << "Closed: ";
+            for(auto i:closed) out << i;
+            out << std::endl;
         }
 
         if(curr == end1){
@@ -97,13 +97,16 @@ void findWay(char start, char end1, char end2, std::map<char, elem>& my_map, std
 
 void read(std::istream & in, char& start, char& end1, char& end2, std::map<char, elem>& my_map) {
     in >> start >> end1 >> end2;
+
     char a, b;
     float c = 0;
     while(in >> a >> b >> c) {
+
         if(c == -1) break;
         my_map[a].ways.push_back({b,c});
         std::sort(my_map[a].ways.begin(),my_map[a].ways.end(), cmp);
     }
+
 }
 
 int main() {
@@ -135,6 +138,7 @@ int main() {
         }
         else {
             read(file,start,end1,end2,my_map);
+
         }
     }
     if(choseOut == 1) {
