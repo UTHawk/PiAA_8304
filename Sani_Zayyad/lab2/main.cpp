@@ -20,7 +20,6 @@ int G(char from, std::map<char, VertexInfo> &graphDict) {
 
 int H(char from, char endvertex) {
     return abs(from - endvertex);
-    
 }
 
 int F(char from, char endvertex, std::map<char, VertexInfo>& graphDict){
@@ -56,19 +55,32 @@ void astarAlgo(char startVertex, char endVertex,std::map<char, VertexInfo>& grap
     std::map<char,char> from;
     
     while(!open.empty()) {
-        currentVertex = minVertex(open,endVertex,graphDict);
+
         
+        std::cout << "* поиск необработанной вершины для проведения релаксации *" << std::endl;
+        currentVertex = minVertex(open,endVertex,graphDict);
+        std::cout << "* вершина для релаксации -- <" <<currentVertex << "> *" << std::endl;
+
+        
+        //currentvertex = end , algorithm ends
         if(currentVertex == endVertex){//endGame
+            std::cout << "_________________________________" << std::endl;
+            std::cout << "Optima path : ";
             std::cout << constructPath(from, startVertex, endVertex) << std::endl;
             return;
         }
+        
         open.erase(currentVertex);
         closed.insert(currentVertex);
-
+        
+        std::cout << "* релаксация ребер, исходящих из вершины *" << std::endl;
         for(auto neighbour : graphDict[currentVertex].neighbors) {
             bool tentative_is_better;
-            if(closed.find(neighbour.first) != closed.end())
+            if(closed.find(neighbour.first) != closed.end())//if it has been visited
                 continue;
+            
+            std::cout << " ** путь из "<< currentVertex << " в " << neighbour.first << " ** " << std::endl;
+            
             int tentative_g_score = G(currentVertex, graphDict) + neighbour.second;
             if(open.find(neighbour.first) == open.end()){
                 open.insert(neighbour.first);
@@ -77,11 +89,13 @@ void astarAlgo(char startVertex, char endVertex,std::map<char, VertexInfo>& grap
             else {
                 tentative_is_better = tentative_g_score < G(neighbour.first, graphDict);
             }
-
+            
             if(tentative_is_better) {
                 from[neighbour.first] = currentVertex;
+                std::cout << " ** успешная релаксация: новая длина -> " << tentative_g_score << " ** " << std::endl;
                 graphDict[neighbour.first].length = tentative_g_score;
             }
+            std::cout << "* конец релаксации *" << std::endl;
         }
     }
     std::cout << "No way" << std::endl;
@@ -112,13 +126,11 @@ int main() {
         if(length == -1)
             break;
         graphDict[from].neighbors.push_back({to,length});
-//        std::sort(graphDict[from].neighbors.begin(),graphDict[from].neighbors.end(), cmp);
     }
         
     
     auto time = clock();
     std::cout << "_________AStar Algorith with Monotone function________" << std::endl;
-    std::cout << "Optima path : ";
     astarAlgo(startVertex, endVertex, graphDict);
     if(monotone(graphDict, endVertex)){
         std::cout<< "The heuristic function of the graph is Monotone\n";
@@ -126,7 +138,6 @@ int main() {
     }else{
         std::cout << "Not Monotone\n";
     }
-    std::cout << "_________________________________" << std::endl;
     std::cout << "Time taken : " << (double)(clock() - time) / CLOCKS_PER_SEC << std::endl;
     std::cout << "Algorith complexity G(V,E) : O(|V| * |V| + E) ~ O(V * V)" << std::endl;
     std::cout << "where V - Vertices and E - edges" << std::endl;
