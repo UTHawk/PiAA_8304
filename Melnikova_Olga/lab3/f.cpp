@@ -151,41 +151,41 @@ void input(std::string argv) {
 
 
 
-int bfs(char currVertex /*текущая вершина*/, int c_min /*минимальный поток в сети*/, std::string tab) {
-    std::cout<<tab<<"Текущая вершина "<<currVertex<<"\n";
+int bfs(char currVertex /*текущая вершина*/, int c_min /*минимальный поток в сети*/, std::string tab, std::ostream& fout) {
+    fout<<tab<<"Текущая вершина "<<currVertex<<"\n";
     if(currVertex == end){ //конец
-        std::cout<<tab<<"Текущая вершина - сток\n";
+        fout<<tab<<"Текущая вершина - сток\n";
         return c_min;
     }
 
     visited[currVertex] = true; //обознач. посещенной
-    std::cout<<tab<<"Цикл по детям "<<currVertex<<"\n";
+    fout<<tab<<"Цикл по детям "<<currVertex<<"\n";
     for(auto& edge : dictOfVertex[currVertex].destinations) {
-        std::cout<<tab<<"Ребро ведет в "<<edge.end<<"; П/С пути "<< edge.bandwidth << "; поток через ребро "<< edge.flow <<"\n";
+        fout<<tab<<"Ребро ведет в "<<edge.end<<"; П/С пути "<< edge.bandwidth << "; поток через ребро "<< edge.flow <<"\n";
         if(!visited[edge.end]){
-            std::cout<<tab<<"Ребро не посещенное\n";
+            fout<<tab<<"Ребро не посещенное\n";
         }else{
-            std::cout<<tab<<"Ребро посещенное\n";
+            fout<<tab<<"Ребро посещенное\n";
         }
         if (edge.end != currVertex) { //не цикл
             if (!visited[edge.end] && (edge.flow < edge.bandwidth && !edge.is_reverse)) {
     //если не посещенная и поток в сети меньше макс. пропуск. способности и не обратное
-                std::cout<<tab<<"Ребро не обратное\n";
-                int flow = bfs(edge.end, std::min(c_min, edge.bandwidth - edge.flow), tab+" ");
+                fout<<tab<<"Ребро не обратное\n";
+                int flow = bfs(edge.end, std::min(c_min, edge.bandwidth - edge.flow), tab+" ", fout);
                 //запуск. функц. с этим ребенком и мин. из тек. мин. потока в сети и разностью между макс. пропуск. способ. и потоком.
                 if (flow > 0) {
                     edge.flow += flow;
-                    std::cout<<tab<<"Возвращаемое значение "<< flow <<"\n";
+                    fout<<tab<<"Возвращаемое значение "<< flow <<"\n";
                     return flow;
                 }
             } else if (!visited[edge.end] && (edge.is_reverse && edge.flow > 0)) {
                 //если не посещенная, обратная и поток больше 0
-                std::cout<<tab<<"Ребро обратное\n";
-                int flow = bfs(edge.end, std::min(c_min, edge.flow), tab+" ");
+                fout<<tab<<"Ребро обратное\n";
+                int flow = bfs(edge.end, std::min(c_min, edge.flow), tab+" ", fout);
                 //запуск. функц. с этим ребенком и минимумом из тек. мин. потока в сети и потоком.
                 if (flow > 0) {
                     edge.flow -= flow;
-                    std::cout<<tab<<"Возвращаемое значение "<< flow <<"\n";
+                    fout<<tab<<"Возвращаемое значение "<< flow <<"\n";
                     return flow;
                 }
             }
@@ -205,7 +205,7 @@ void output(int flow){
 }
 void output(int flow, std::string argv){
     std::ofstream fout;
-    fout.open(argv);
+    fout.open(argv, std::ios_base::out | std::ios_base::app);
     fout << flow << std::endl;
     for(auto& i : dictOfVertex) {
         for(auto& j : i.second.destinations) {
@@ -223,33 +223,91 @@ int main(int argc, char *argv[]) {
         input(); //из консоли
     }
 
-    int flow = 0;
-    int iterationResult = 0;
-    std::cout<<"Максимальный поток " <<flow<< "\n";
-    while (true) {
-        iterationResult = bfs(begin, 1000, " ");
-        if(iterationResult <= 0)
-            break;
-        for (auto& i : visited)
-            i.second = false;
-        flow += iterationResult;
-        std::cout<<"Максимальный поток " <<flow<< "\n";
 
-    }
-
-    for(auto& i : dictOfVertex) {
-        std::sort(i.second.destinations.begin(), i.second.destinations.end(), [](Edge e1, Edge e2){return e1.end < e2.end;});
-    }
     if(argv[1]==NULL){
+        int flow = 0;
+        int iterationResult = 0;
+        //std::cout<<"Максимальный поток " <<flow<< "\n";
+        while (true) {
+            iterationResult = bfs(begin, 1000, " ", std::cout);
+            if(iterationResult <= 0)
+                break;
+            for (auto& i : visited)
+                i.second = false;
+            flow += iterationResult;
+            //std::cout<<"Максимальный поток " <<flow<< "\n";
+
+        }
+
+        for(auto& i : dictOfVertex) {
+            std::sort(i.second.destinations.begin(), i.second.destinations.end(), [](Edge e1, Edge e2){return e1.end < e2.end;});
+        }
         output(flow);
+
     }
     else if(std::string(argv[1]) == "res.txt"){
+        std::ofstream fout;
+        fout.open(argv[1]);
+        int flow = 0;
+        int iterationResult = 0;
+        //std::cout<<"Максимальный поток " <<flow<< "\n";
+        while (true) {
+            iterationResult = bfs(begin, 1000, " ", fout);
+            if(iterationResult <= 0)
+                break;
+            for (auto& i : visited)
+                i.second = false;
+            flow += iterationResult;
+            //std::cout<<"Максимальный поток " <<flow<< "\n";
+
+        }
+        fout.close();
+        for(auto& i : dictOfVertex) {
+            std::sort(i.second.destinations.begin(), i.second.destinations.end(), [](Edge e1, Edge e2){return e1.end < e2.end;});
+        }
         output(flow, std::string(argv[1]));
     }else{
         if(argv[2]==NULL){
+            int flow = 0;
+            int iterationResult = 0;
+            //std::cout<<"Максимальный поток " <<flow<< "\n";
+            while (true) {
+                iterationResult = bfs(begin, 1000, " ", std::cout);
+                if(iterationResult <= 0)
+                    break;
+                for (auto& i : visited)
+                    i.second = false;
+                flow += iterationResult;
+                //std::cout<<"Максимальный поток " <<flow<< "\n";
+
+            }
+
+            for(auto& i : dictOfVertex) {
+                std::sort(i.second.destinations.begin(), i.second.destinations.end(), [](Edge e1, Edge e2){return e1.end < e2.end;});
+            }
             output(flow);
         }
         if(argv[2]!=NULL){
+            std::ofstream fout;
+            fout.open(argv[2]);
+            int flow = 0;
+            int iterationResult = 0;
+            //std::cout<<"Максимальный поток " <<flow<< "\n";
+            while (true) {
+                iterationResult = bfs(begin, 1000, " ", fout);
+                if(iterationResult <= 0)
+                    break;
+                for (auto& i : visited)
+                    i.second = false;
+                flow += iterationResult;
+                //std::cout<<"Максимальный поток " <<flow<< "\n";
+
+            }
+
+            for(auto& i : dictOfVertex) {
+                std::sort(i.second.destinations.begin(), i.second.destinations.end(), [](Edge e1, Edge e2){return e1.end < e2.end;});
+            }
+            fout.close();
             output(flow, std::string(argv[2]));
         }
     }
