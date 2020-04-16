@@ -13,6 +13,7 @@ Track::Track(int length)
         minimalSquare[i] = new Square[length];
     }
 
+    colorCount = 0;
     minSquareNum = length * length;
     squareCount = 0;
 }
@@ -34,8 +35,8 @@ void Track::startBacktracking()
 {
     paintSquare(0, 0, length/2 + 1);
     paintSquare(length / 2 + 1, 0, length / 2);
-    paintSquare(0, length / 2 + 1, length / 2); //оптимизация алгоритма, оставляем 1/4 часть квадрата
-
+    paintSquare(0, length / 2 + 1, length / 2); //optimization of the algorithm , leaving 1/4 of the square
+    
     backtracking(length/2, length/2, length/2);
     writeRes();
 }
@@ -50,12 +51,21 @@ void Track::paintSquare(int x, int y, int length)
             tempSquare[i][j].number = squareCount;
         }
     }
+    
+    colorCount++;
+
+    if (this->length <= 10) {
+
+        std::cout << "Process " << colorCount << std::endl;
+        printSquareProcess(tempSquare);
+    }
 }
 
 
 
 void Track::backtracking(int length, int x, int y)
 {
+
     if (squareCount >= minSquareNum) {
         return;
     }
@@ -104,7 +114,6 @@ bool Track::canPaintSquare(int x, int y, int length)
     }
 
     paintSquare(x, y, length);
-
     return true;
 }
 
@@ -134,10 +143,26 @@ void Track::checkMinSquare()
     }
 }
 
+void Track::printSquareProcess(Square** square)
+{
+    std::cout << "________________________________" << std::endl;
+    for (auto i = 0; i < length; ++i) {
+        for (int j = 0; j < length; ++j) {
+            std::cout << square[i][j].number << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "________________________________" << std::endl;
+}
+
 
 void Track::writeRes()
 {
-    std::cout << minSquareNum << std::endl;
+    std::cout << "\nResult : \n";
+
+    printSquareProcess(minimalSquare);
+
+    std::cout << "Minimal square: "<< minSquareNum << std::endl;
     for (auto i = 1; i <= minSquareNum; ++i) {
         for (auto y = 0; y < length; ++y) {
 
@@ -160,15 +185,15 @@ void Track::optimalSolution() {
     int n = length;
     
     if (n % 2 == 0) {
-        std::cout << "4\n"; //Получится 4 одинаковых квадрата
+        std::cout << "4\n";
         std::cout << "1 1 " << n/2 << std::endl;
         std::cout << 1 + n/2 << " 1 " << n/2 << std::endl;
         std::cout << "1 " << 1 + n/2 << " " << n/2 << std::endl;
         std::cout << 1 + n/2 << " " << 1 + n/2 << " " << n/2 << std::endl;
     }
     else if (n % 3 == 0) {
-        std::cout << "6" << std::endl; // Получится квадрат размером 2/3
-        std::cout << "1 1 " << 2 * n / 3 << std::endl;      // от размера заданного и 5 квадратов размером 1/3
+        std::cout << "6" << std::endl;
+        std::cout << "1 1 " << 2 * n / 3 << std::endl;
         std::cout << 1 + 2 * n / 3 << " 1 " << n / 3 << std::endl;
         std::cout << "1 " << 1 + 2 * n / 3 << " " << n / 3 << std::endl;
         std::cout << 1 + 2 * n / 3 << " " << 1 + n / 3 << " " << n / 3 << std::endl;
@@ -176,8 +201,8 @@ void Track::optimalSolution() {
         std::cout << 1 + 2 * n / 3 << " " << 1 + 2 * n / 3 << " " << n / 3 << std::endl;
     }
     else if (n % 5 == 0) {
-        std::cout << "8" << std::endl; // Получится квадрат размером 3/5 от
-        std::cout << "1 1 " << 3 * n / 5 << std::endl;      // размера заданного, 3 квадрата 2/5 и 4 квадрата 1/5
+        std::cout << "8" << std::endl;
+        std::cout << "1 1 " << 3 * n / 5 << std::endl;    
         std::cout << 1 + 3 * n / 5 << " 1 " << 2 * n / 5 << std::endl;
         std::cout << "1 " << 1 + 3 * n / 5 << " " << 2 * n / 5 << std::endl;
         std::cout << 1 + 3 * n / 5 << " " << 1 + 3 * n / 5 << " " << 2 * n / 5 << std::endl;

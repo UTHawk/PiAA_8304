@@ -34,6 +34,8 @@ private:
     void clearSquare(int x, int y, int len);
     void checkMinSquare(); 
     void writeRes();
+    void printSquareProcess(Square** square);
+
 
 private:
     Square** tempSquare;
@@ -41,6 +43,7 @@ private:
     int length;
     int minSquareNum;
     int squareCount;
+    int colorCount;
 };
 
 #endif /* backtrack_hpp */
