@@ -8,16 +8,25 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <locale>
+
 class Graph {
 
 	std::vector<std::vector<double>> matrix;
+
 	std::vector<int> distance;
-	std::vector<int> distanceWithHeuristic;
-	std::vector<int> visited;
-	std::vector<std::pair<int, double>> path;
-	std::queue<int> queue;
+	std::vector<int> distanceWithHeuristic; //добавляется расстояние между символами
+	std::vector<int> visited; //хранит время посещения
 	std::set<int> notVisited;
+
+	std::vector<std::pair<int, double>> path;
+
+	std::queue<int> queue;
+
 	int visitTime;
+
+	std::string answer;
+
 public:
 
 	Graph(int start, int end) {
@@ -66,7 +75,7 @@ public:
 		}
 	}
 
-	int next(int current) {
+	int next(int current) { //для жадного алгоритма: выбирает следующую вершину по наименьшему пути
 		int minPath = 10000;
 		int minIndex = -1;
 		for (int i = 0; i < matrix.size(); i++) {
@@ -90,7 +99,7 @@ public:
 				matrix[start][index] = -1;
 				start = index;
 			}
-			else {
+			else { //если больше путей нет возвращаемся на шаг назад
 				path.pop_back();
 				start = path[path.size() - 1].first;
 			}
@@ -100,44 +109,11 @@ public:
 
 	}
 
-	int heuristicNext(int current) {
-		int minDistance = 10000;
-		int heuristicDistance = 0;
-		int minIndex = -1;
-		for (int i = 0; i < matrix.size(); i++) {
 
-			if (matrix[current][i] > -1 && (!visited[i])) {
-			
-				if (distance[i] > (distance[current] + matrix[current][i])) {
-					distance[i] = distance[current] + matrix[current][i];
-				}
-				if (distance[i] < minDistance) {
-					minDistance = distance[i];
-					heuristicDistance = abs(i - current);
-					minIndex = i;
-				}
-				else if (distance[i] == minDistance){
-					if (abs(i - current) > heuristicDistance) {
-						minDistance = (abs(i - current) + matrix[current][i]);
-						heuristicDistance = abs(i - current);
-						minIndex = i;
-					}
-				}
-
-			}
-
-			
-			
-		}
-		return minIndex;
-	}
-
-
-
-	int minNode() {
+	int minNode() { //выбор следующей вершины для обработки по наименьшей метке с учетом расстояния между символами
 		int min = -1;
 
-		for (auto i : notVisited) {
+		for (auto i : notVisited) { 
 			if (min < 0) {
 				min = i;
 			}
@@ -155,7 +131,7 @@ public:
 	}
 
 
-	void heuristicSearch(int start, int end) {
+	bool heuristicSearch(int start, int end) { 
 
 		for (int i = 0; i < matrix.size(); i++) {
 			distanceWithHeuristic.push_back(10000);
@@ -169,20 +145,21 @@ public:
 		while (!notVisited.empty()) {
 		
 			int curMinNode = minNode();
-
+			std::cout << "Обрабатываемая вершина: " << (char)(curMinNode + 97) << "\n";
 			if (curMinNode == end) {
 				printResultHeuristic(start, end);
-				return;
+				return true;
 			}
 
 			notVisited.erase(curMinNode);
 			visited[curMinNode] = visitTime++;
 
-			for (int i = 0; i < matrix.size(); i++) {
+			for (int i = 0; i < matrix.size(); i++) { //обработка всех смежных вершин и обновление меток
 
 				if ((matrix[curMinNode][i] > -1) && (visited[curMinNode] != 0)) {
 					int newDistance = distance[curMinNode] + matrix[curMinNode][i]; //+ abs(i - end);
 					if ((!visited[i]) || (distance[i] > newDistance)) {
+						std::cout << "Обновление вершины: " << (char)(i + 97) << ". Новая метка: "<< newDistance <<"\n";
 						distance[i] = newDistance;
 						distanceWithHeuristic[i] = distance[i] + abs(i - end);
 						visited[i] = 0;
@@ -193,15 +170,9 @@ public:
 					}
 				}
 			}
-			
-		
+			std::cout << "\n\n";
 		}
-
-
-
-
-
-	
+		return false;
 	}
 
 	void printResult() {
@@ -212,29 +183,21 @@ public:
 	}
 
 	void printResultHeuristic(int start, int end) {
-		//for (int i = 0; i < matrix.size(); i++) {
-		//	for (int j = 0; j <= i; j++) {
-		//		std::swap(matrix[i][j], matrix[j][i]);
-		//	}
-		//}
+
 		int trueEnd = end;
 		int cur = end;
 		std::stack<int> sequence;
 		sequence.push(end);
 		std::vector<int> options;
 		while (end != start) {
-			//int withMinTime = 10000;
+
 			int withMinTime = -1;
 			int minIndex = -1;
 			for (int i = 0; i < matrix.size(); i++) {
 				if (matrix[i][end] > -1) {
-					if ((distance[end] - matrix[i][end]) == distance[i]) { 
-						//options.push_back(i);
-						///////
-						//end = i;
-						//break;
-						std::cout << (char)(i + 97) << " " << visited[i] << " " << (char)(end + 97) << "\n";
-						if (visited[i] > withMinTime) {
+					if ((distance[end] - matrix[i][end]) == distance[i]) { //если есть два возможных перехода, то выбираем исходя из времени посещения
+
+						if (visited[i] > withMinTime) { 
 							withMinTime = visited[i];
 							minIndex = i;
 						}
@@ -242,30 +205,39 @@ public:
 				}
 				
 			}
-			//int withMinTime = 10000;
-			//for (int i = 0; i < options.size(); i++) {
-			//	if (visited[options[i]] < withMinTime) {
-			//		withMinTime = visited[options[i]];
-			//		end = options[i];
-			//	}
-					
-			//}
+
 			end = minIndex;
 			sequence.push(end);
 		}
 
-
+		std::cout << "Ответ: ";
 		while (!sequence.empty()) {
+			answer += (char)(sequence.top() + 97);
 			std::cout << (char)(sequence.top()+97);
 			sequence.pop();
 		}
 		std::cout << "\n";
 
 	}
+
+	bool checkMonotony() {
+		if (answer.size() == 0)
+			return false;
+		for (int i = 0; i < (answer.size()-1); i++) {
+			if (answer[i] > answer[i + 1]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 };
 
 
 int main(){
+
+	setlocale(LC_ALL, "Russian");
+
 	char start = '\0';
 	char end = '\0';
 
@@ -283,10 +255,18 @@ int main(){
 		graph.setNode(from, whereto, weight);
 		std::cin >> from >> whereto >> weight;
 	}
-	//graph.printMatrix();
+
 	std::cout << "============================\n";
 	//graph.greedySearch(start - 97, end - 97);
-	graph.heuristicSearch(start - 97, end - 97);
-	//std::cout << "============================\n";
+	if (graph.heuristicSearch(start - 97, end - 97)) 
+		std::cout << "Задача допустимая\n";
+	else
+		std::cout << "Задача не допустимая\n";
+	
+	if (graph.checkMonotony())
+		std::cout << "Задача монотонная\n";
+	else
+		std::cout << "Задача не монотонная\n";
+	std::cout << "============================\n";
 	return 0;
 }
