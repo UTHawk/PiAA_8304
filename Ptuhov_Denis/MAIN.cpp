@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 
+//структура для хранения вершины
 struct Vertex
 {
     std::vector<int> next;
@@ -17,6 +18,7 @@ struct Vertex
     std::vector<int> go;
 };
 
+//создание вершины
 Vertex make_bor_vertex(int from, char how)
 {
     Vertex vert;
@@ -28,6 +30,7 @@ Vertex make_bor_vertex(int from, char how)
     return vert;
 }
 
+//добавление строки в бор
 void addToBor(std::string& str, std::vector<Vertex>& bor, std::map<char, int>& alphabet, int str_num)
 {
     int borInd = 0;
@@ -50,6 +53,7 @@ void addToBor(std::string& str, std::vector<Vertex>& bor, std::map<char, int>& a
 
 int go(int v, char c, std::vector<Vertex>& bor);
 
+//прохождение по ссылке
 int get_link(int v, std::vector<Vertex>& bor)
 {
     if (bor[v].link == -1)
@@ -63,6 +67,7 @@ int get_link(int v, std::vector<Vertex>& bor)
     return bor[v].link;
 }
 
+//прохождение по переходу (ребру)
 int go(int v, char c, std::vector<Vertex>& bor)
 {
     if (bor[v].go[c] == -1)
@@ -83,6 +88,7 @@ int go(int v, char c, std::vector<Vertex>& bor)
 
 void AXO_CORASIK(std::istream& in, std::ostream& out)
 {
+    // создание алфавита
     std::map<char, int> alphabet;
     alphabet['A'] = 0;
     alphabet['C'] = 1;
@@ -94,6 +100,7 @@ void AXO_CORASIK(std::istream& in, std::ostream& out)
     std::string pattern;
     char J;
 
+    //считывание данных
     in >> text;
     in >> pattern;
     in >> J;
@@ -106,6 +113,7 @@ void AXO_CORASIK(std::istream& in, std::ostream& out)
     std::vector<std::string> q;
     std::vector<size_t> l;
 
+    //разбиение исходного шаблона на множество подстрок
     std::string cur;
     for (size_t i = 0; i < pattern.length(); ++i)
     {
@@ -122,6 +130,7 @@ void AXO_CORASIK(std::istream& in, std::ostream& out)
             cur += pattern[i];
     }
 
+    //слзжание бора и добавление в него ранее найденных подстрок
     std::vector<Vertex> bor;
     bor.push_back(make_bor_vertex(0, 0));
 
@@ -141,6 +150,7 @@ void AXO_CORASIK(std::istream& in, std::ostream& out)
     bool f;
     int vert_num;
     int u = 0;
+    //проход по автомату и одновременное заполнение массива С
     for (size_t i = 0; i < text.length(); ++i)
     {
         out << "Go from " << u << " vertex";
@@ -172,6 +182,7 @@ void AXO_CORASIK(std::istream& in, std::ostream& out)
     }
 
 
+    //вывод результатов
     for (size_t i = 0; i < text.size(); ++i)
         if (c[i] == q.size())
         {
