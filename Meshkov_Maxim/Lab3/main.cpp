@@ -3,6 +3,10 @@
 #include <set>
 #include <vector>
 #include <cassert>
+#include <fstream>
+
+std::ostream *out;
+std::istream *in;
 
 bool debug = false;
 
@@ -109,74 +113,74 @@ void printGraph(const Graph &graph, bool printReverseEdges = true, bool printPro
         for (auto &edge : vertex->edges) {
             if (edge->isReverseEdge && !printReverseEdges)
                 continue;
-            std::cout << vertex->name << " " << edge->target->name;
+            *out << vertex->name << " " << edge->target->name;
             if (printProperties) {
-                std::cout
+                *out
                         << " {capacity: " << edge->capacity
                         << ", flow: " << edge->flow
                         << ", isReverseEdge: " << (edge->isReverseEdge ? "true" : "false")
                         << "}";
             }
             else {
-                std::cout << " " << edge->flow;
+                *out << " " << edge->flow;
             }
-            std::cout << std::endl;
+            *out << std::endl;
         }
     }
 }
 
 void printPath(const Path &path) {
     for (auto &edge : path) {
-        std::cout << edge->source->name << " ";
+        *out << edge->source->name << " ";
     }
     assert(!path.empty());
-    std::cout << path.back()->target->name << std::endl;
+    *out << path.back()->target->name << std::endl;
 }
 
 int findMaxFlow(Graph &graph) {
-    if (debug) std::cout << "Adding reverse edges:" << std::endl;
+    if (debug) *out << "Adding reverse edges:" << std::endl;
     addReverseEdges(graph);
     if (debug) printGraph(graph);
 
     int maxFlow = 0;
     Path path;
 
-    if (debug) std::cout << "Searching a path." << std::endl;
+    if (debug) *out << "Searching a path." << std::endl;
     while (findPath(graph.source, graph.target, path)) {
         if (debug) {
-            std::cout << "Path is found: " << std::endl;
+            *out << "Path is found: " << std::endl;
             printPath(path);
         }
 
         int minCapacity = findMinCapacity(path);
-        if (debug) std::cout << "Min capacity = " << minCapacity << std::endl;
+        if (debug) *out << "Min capacity = " << minCapacity << std::endl;
 
-        if (debug) std::cout << "Changing the flow through the path." << std::endl;
+        if (debug) *out << "Changing the flow through the path." << std::endl;
         changeFlow(path, minCapacity);
         if (debug) {
-            std::cout << "Modified graph:" << std::endl;
+            *out << "Modified graph:" << std::endl;
             printGraph(graph);
         }
 
         maxFlow += minCapacity;
-        if (debug) std::cout << "Flow value = " << maxFlow << std::endl;
+        if (debug) *out << "Flow value = " << maxFlow << std::endl;
     }
-    if (debug) std::cout << "Path is not found - the algorithm is complete." << std::endl;
+    if (debug) *out << "Path is not found - the algorithm is complete." << std::endl;
     return maxFlow;
 }
 
 Graph readGraph() {
     int vertexNumber;
-    std::cin >> vertexNumber;
+    *in >> vertexNumber;
 
     char sourceName, targetName;
-    std::cin >> sourceName >> targetName;
+    *in >> sourceName >> targetName;
 
     std::map<char, Vertex *> vertices;
     for (int i = 0; i < vertexNumber; i++) {
         char edgeSourceName, edgeTargetName;
         int capacity;
-        std::cin >> edgeSourceName >> edgeTargetName >> capacity;
+        *in >> edgeSourceName >> edgeTargetName >> capacity;
 
         auto &edgeSource = vertices[edgeSourceName];
         if (edgeSource == nullptr)
@@ -207,11 +211,21 @@ int main(int ac, char** av) {
     if (ac > 1)
         debug = true;
 
+    int inputMode, outputMode;
+    std::cout << "Enter input mode (0 is default, 1 is file): ";
+    std::cin >> inputMode;
+    std::cout << "Enter output mode (0 is default, 1 is file): ";
+    std::cin >> outputMode;
+    std::ifstream inFile("in.txt");
+    std::ofstream outFile("out.txt");
+    in = inputMode == 0 ? &std::cin : &inFile;
+    out = outputMode == 0 ? &std::cout : &outFile;
+
     auto graph = readGraph();
 
     int maxFlow = findMaxFlow(graph);
 
-    std::cout << maxFlow << std::endl;
+    *out << maxFlow << std::endl;
     printGraph(graph, false, false);
 
     return 0;
