@@ -33,10 +33,11 @@ std::string dfsAugmentedPath(std::map<char, Vertex> graph, char source, char sin
     std::string path = {source};
     
     char selectedVertex = selectAvailabevertex(graph[currentVertex].destinations, graph);
-
     //iterative DFS
     while(currentVertex != sink && !(currentVertex == source && selectedVertex == 0)){
         
+        std::cout << "* Vertex to transverse * -> " << currentVertex << std::endl;
+
         graph[currentVertex].visited = true;
         
         if(selectedVertex != 0) {
@@ -51,6 +52,9 @@ std::string dfsAugmentedPath(std::map<char, Vertex> graph, char source, char sin
         }
         
         selectedVertex = selectAvailabevertex(graph[currentVertex].destinations, graph);
+        if(currentVertex == sink)
+            std::cout << "* Vertex to transverse * -> " << currentVertex << std::endl;
+
     }
     
     return path;
@@ -73,7 +77,9 @@ int minCapacity(std::string augPath, std::map<char, Vertex> residualGraph){
 
 void updateResidualGraph(std::string augPath, std::map<char, Vertex>& residualGraph){
     int min = minCapacity(augPath,residualGraph);
-    
+    std::string path = augPath;
+    std::cout << "## Min Capacity in path* -> " << min << "\n";
+
     while(augPath.size() > 1){
         for(auto& vertex : residualGraph[augPath[0]].destinations)
             if(vertex.first == augPath[1]) {
@@ -89,6 +95,8 @@ void updateResidualGraph(std::string augPath, std::map<char, Vertex>& residualGr
             }
         augPath.erase(augPath.begin());
     }
+    std::cout << "Aug path : " << path << " updated successfully******\n\n";
+
     
 }
 
@@ -101,7 +109,7 @@ void maxFlow(std::map<char, Vertex> graph, char source, char sink){
     std::string augPath = dfsAugmentedPath(graph,source,sink);
 
     while (augPath != std::string(1,source)) {
-        std::cout<<"Augmented path: "<<augPath<<"\n";
+        std::cout<<"Updating Augmented path: "<<augPath<<"\n";
         updateResidualGraph(augPath,graph);
         augPath = dfsAugmentedPath(graph,source,sink);
     }
@@ -121,13 +129,11 @@ void maxFlow(std::map<char, Vertex> graph, char source, char sink){
 
 }
 
-
 int main(){
     
     int N;
     char source,sink;
     std::map<char, Vertex> residualGraph;
-
     
     std::cin >> N;
     std::cin >>source;
@@ -141,7 +147,6 @@ int main(){
     }
     
     maxFlow(residualGraph,source,sink);
-    
     
     return 0;
 }
