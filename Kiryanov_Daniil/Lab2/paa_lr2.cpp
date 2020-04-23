@@ -13,7 +13,7 @@ int heuristic(char& first, char& second){//эвристика
 	return std::abs(first-second);
 }
 
-void print(char& start, char& finish, std::map<char, char>& prev, int& menu) {//вывод результата
+void print(char& start, char& finish, std::map<char, char>& prev, int menu) {//вывод результата
 	std::vector<char> result;
 	char current = finish;
 	result.push_back(current);
@@ -22,7 +22,7 @@ void print(char& start, char& finish, std::map<char, char>& prev, int& menu) {//
 		result.push_back(current);//записываем результат в вектор
 	}
 	if (menu == 1) {//вывод в консоль
-		std::cout << std::endl << "Result: ";
+		std::cout << "Result: ";
 		for (unsigned long int i = 0; i < result.size(); ++i) {
 			std::cout << result[result.size() - i - 1];
 		}
@@ -85,6 +85,10 @@ int main() {
 	while (!priorities.empty()) {//пока очередь не станет пустой
 		char current = priorities.top().second;//берем вершину с наименьшим приоритетом
 		priorities.pop();
+		std::cout << "Visiting: " << current << std::endl;
+		std::cout << "Current ";
+		print(start, current, prev, 1);
+		std::cout << std::endl;
 		if (current == finish)//если доходим до конца
 			break;//то завершаем цикл
 		for (auto& next : card[current]) {//для текущей вершины прогоняем все возможные пути
