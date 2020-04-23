@@ -1,9 +1,66 @@
 #include <iostream>
+#include <fstream>
 #include <queue>
+#include <cstring>
 #include <vector>
-#include<chrono>
+#include <chrono>
 
 using namespace std;
+
+class IOManager
+{
+private:
+    static istream* input;
+    static ostream* output;
+public:
+    static void setStreamsFromArgs(int argc, char** argv)
+    {
+        if(argc > 1)
+        {
+            for(int i = 1; i < argc; i++)
+            {
+                if(strcmp(argv[i], "-infile") == 0)
+                {
+                    if(i + 1 < argc)
+                    {
+                        input = new ifstream(argv[i + 1]);
+                        i += 1;
+                    }
+                }
+                if(strcmp(argv[i], "-outfile") == 0)
+                {
+                    if(i + 1 < argc)
+                    {
+                        output = new ofstream(argv[i + 1]);
+                        i += 1;
+                    }
+                }
+            }
+        }
+    }
+    static istream& getIS()
+    {
+        return *input;
+    }
+    static ostream& getOS()
+    {
+        return *output;
+    }
+    static void resetStreams()
+    {
+        if(input != & cin)
+        {
+            delete input;
+            input = &cin;
+        }
+        if(output != & cout)
+        {
+            delete output;
+            output = &cout;
+
+        }
+    }
+};
 
 class Table
 {
@@ -40,12 +97,17 @@ public:
 };
 
 
-int main()
+int main(int argc, char** argv)
 {
+    IOManager::setStreamsFromArgs(argc, argv);
+
     unsigned size = 0;
     unsigned divider = 0;
     unsigned multiplier = 0;
-    cin >> size;
+    cout << "Enter table size." << endl;
+    IOManager::getIS() >> size;
+    cout << "Entered size: " << size << endl;
+
     for(unsigned i = 2; i <= size; i++)
     {
         if(size % i == 0)
@@ -71,18 +133,23 @@ int main()
 
     auto delta = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
 
-    cout << "Search finished!" << endl;
-    cout << "Parts count - " << solution.size() << endl;
+    IOManager::getOS() << "Search finished!" << endl;
+    IOManager::getOS() << "Parts count - " << solution.size() << endl;
     unsigned i = 1;
     for(auto part : solution)
     {
-        cout <<"Par - " << i << " x - " << part.x * multiplier << " y - "
+        IOManager::getOS() <<"Part - " << i << " x - " << part.x * multiplier << " y - "
              << part.y * multiplier << " size - " << part.size * multiplier << endl;
         i += 1;
     }
 
-    cout << "Time - " << static_cast<float>(delta) / 1000000 << endl;
-    cout << "Iterations - " << table.getItersCount() << endl;
+    IOManager::getOS() << "Time - " << static_cast<float>(delta) / 1000000 << endl;
+    IOManager::getOS() << "Iterations - " << table.getItersCount() << endl;
+
+    cout << "Work finished!" << endl;
+
+    IOManager::resetStreams();
+
     return 0;
 }
 
@@ -265,6 +332,7 @@ bool Table::reduceLastImportantPart()
 
     unsigned border = _size / 2 + _size / 4 + 1;
     Part part = _parts.back();
+
     while(part.y  > border)
     {
         if(!removeLastPart())
@@ -274,6 +342,7 @@ bool Table::reduceLastImportantPart()
 
         part = _parts.back();
     }
+
     if(_parts.back().size > 1)
     {
         _parts.pop_back();
@@ -331,9 +400,9 @@ bool Table::verificateWithBacktracking()
 {
     bool hasBetterSolution = false;
 
-    cout << "Starting configuration generated!" << endl;
+    IOManager::getOS() << "Starting configuration generated!" << endl;
     printConfiguration();
-cout << "----------------------------------------Trying to find better solution...---------------------------------------" << endl;
+    IOManager::getOS() << "----------------------------------------Trying to find better solution...---------------------------------------" << endl;
 
     //очистка текущей конфигурации до 3 частей
     while(removeLastPart());
@@ -354,10 +423,10 @@ cout << "----------------------------------------Trying to find better solution.
             _bestConfiguration = _parts;
             hasBetterSolution = true;
 
-            cout << "Better solution finded!" << endl;
-            cout << "Parts count - " << _bestConfiguration.size() << endl;
+            IOManager::getOS() << "Better solution finded!" << endl;
+            IOManager::getOS() << "Parts count - " << _bestConfiguration.size() << endl;
             printConfiguration();
-            cout << "----------------------------------------Trying to find better solution...---------------------------------------" << endl;
+            IOManager::getOS() << "----------------------------------------Trying to find better solution...---------------------------------------" << endl;
         }
 
         while(!reduceLastImportantPart())
@@ -381,11 +450,11 @@ void Table::printConfiguration()
     {
         for(unsigned x = 0; x < _size; x++)
         {
-            cout.width(2);
-            cout.fill(' ');
-            cout << static_cast<unsigned>(_cells[y][x]) << " ";
+            IOManager::getOS().width(2);
+            IOManager::getOS().fill(' ');
+            IOManager::getOS() << static_cast<unsigned>(_cells[y][x]) << " ";
         }
-        cout << endl << endl;
+        IOManager::getOS() << endl << endl;
     }
 }
 
@@ -393,3 +462,6 @@ unsigned long long Table::getItersCount()
 {
     return _itersCount;
 }
+
+istream* IOManager::input = &cin;
+ostream* IOManager::output = &cout;
