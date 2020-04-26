@@ -138,6 +138,7 @@ int main() {
 		flow += test;//максимальное значение
 		net(start, finish, prev, card, test);//обновляем показатели
 	}
+	std::cout << "No more ways." << std::endl;
 	menu = 0;
 	std::cout << std::endl << "How do you want to output?" << std::endl << std::endl
 		<< "Press 1 to output by console." << std::endl//выбор как вывести
