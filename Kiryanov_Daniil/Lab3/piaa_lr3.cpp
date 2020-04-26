@@ -23,7 +23,8 @@ bool cmp(std::pair<char, elem> i, std::pair<char, elem> j) {
 	return i.first < j.first;//компаратор для сортировки 
 }//в лексикографическом порядке
 
-void net(char start, char finish, std::map<char, char> prev, std::map<char, std::vector<std::pair<char, elem>>>& card, int min) {
+void net(char start, char finish, std::map<char, char> prev, std::map<char, //обновление значений
+	std::vector<std::pair<char, elem>>>& card, int min) {//элементов
 	std::vector<char> result;
 	char current = finish;
 	result.push_back(current);
@@ -63,7 +64,8 @@ void net(char start, char finish, std::map<char, char> prev, std::map<char, std:
 	std::cout << std::endl;
 }
 
-int find(std::map<char, std::vector<std::pair<char, elem>>>& card, char current, char finish, std::map<char, char>& prev, std::map<char, bool> visited, int result) {
+int find(std::map<char, std::vector<std::pair<char, elem>>>& card, char current, char finish,//поиск пути
+	std::map<char, char>& prev, std::map<char, bool> visited, int result) {//и минимального результата
 	std::cout << "Visiting: " << current << std::endl;//отладочный вывод
 	if (current == finish)//если дошли до конца
 		return result;//возвращаем результат
