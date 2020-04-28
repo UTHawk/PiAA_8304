@@ -24,7 +24,7 @@ bool cmp(std::pair<char, elem> i, std::pair<char, elem> j) {
 }//в лексикографическом порядке
 
 void net(char start, char finish, std::map<char, char> prev, std::map<char, //обновление значений
-	std::vector<std::pair<char, elem>>>& card, int min) {//элементов
+	std::vector<std::pair<char, elem>>>& card, int min, std::ostream& output) {//элементов
 	std::vector<char> result;
 	char current = finish;
 	result.push_back(current);
@@ -32,41 +32,41 @@ void net(char start, char finish, std::map<char, char> prev, std::map<char, //о
 		current = prev[current];
 		result.push_back(current);
 	}
-	std::cout << "Found way: ";//отладочный вывод
+	output << "Found way: ";//отладочный вывод
 	for (unsigned long int i = 0; i < result.size(); ++i) {
-		std::cout << result[result.size() - i - 1];//выводим найденный путь
+		output << result[result.size() - i - 1];//выводим найденный путь
 	}
-	std::cout << std::endl << std::endl;
-	std::cout << "Changes of edges:" << std::endl;//отладочный вывод
+	output << std::endl << std::endl;
+	output << "Changes of edges:" << std::endl;//отладочный вывод
 	for (unsigned long int i = 0; i < result.size()-1; ++i) {//изменяем значения элементов
 		for (auto& next : card[result[result.size()-i-1]]) {//для обычных путей
 			if (next.first==result[result.size() - i-2]) {
-				std::cout << "Capacity " << result[result.size() - i - 1] << next.first << ": " << next.second.capacity;
+				output << "Capacity " << result[result.size() - i - 1] << next.first << ": " << next.second.capacity;
 				next.second.capacity -= min;//выводим изменения
-				std::cout << " -> " << next.second.capacity << std::endl;
-				std::cout << "Flow " << result[result.size() - i - 1] << next.first << ": " << next.second.flow;
+				output << " -> " << next.second.capacity << std::endl;
+				output << "Flow " << result[result.size() - i - 1] << next.first << ": " << next.second.flow;
 				next.second.flow += min;//выводим изменения
-				std::cout << " -> " << next.second.flow << std::endl << std::endl;
+				output << " -> " << next.second.flow << std::endl << std::endl;
 				for (auto& j : card[result[result.size() - i-2]]) {//для обратных путей
 					if (j.first == result[result.size() - i - 1]) {
-						std::cout << "Capacity " << result[result.size() - i - 2] << j.first << ": " << j.second.capacity;
+						output << "Capacity " << result[result.size() - i - 2] << j.first << ": " << j.second.capacity;
 						j.second.capacity += min;//выводим изменения
-						std::cout << " -> " << j.second.capacity << std::endl;
-						std::cout << "Flow " << result[result.size() - i - 2] << j.first << ": " << j.second.flow;
+						output << " -> " << j.second.capacity << std::endl;
+						output << "Flow " << result[result.size() - i - 2] << j.first << ": " << j.second.flow;
 						j.second.flow -= min;//выводим изменения
-						std::cout << " -> " << j.second.flow << std::endl << std::endl;
+						output << " -> " << j.second.flow << std::endl << std::endl;
 					}
 				}
 			}
 		}
 
 	}
-	std::cout << std::endl;
+	output << std::endl;
 }
 
 int find(std::map<char, std::vector<std::pair<char, elem>>>& card, char current, char finish,//поиск пути
-	std::map<char, char>& prev, std::map<char, bool> visited, int result) {//и минимального результата
-	std::cout << "Visiting: " << current << std::endl;//отладочный вывод
+	std::map<char, char>& prev, std::map<char, bool> visited, int result, std::ostream& output) {//и минимального результата
+	output << "Visiting: " << current << std::endl;//отладочный вывод
 	if (current == finish)//если дошли до конца
 		return result;//возвращаем результат
 	std::sort(card[current].begin(), card[current].end(), comp);//сортируем по возрастанию пропускной способности
@@ -75,7 +75,7 @@ int find(std::map<char, std::vector<std::pair<char, elem>>>& card, char current,
 		if ((!visited[next.first]) && (next.second.capacity > 0)) {//если не посещена и пропускная способность>0
 			result = next.second.capacity;//первое ребро - начальный результат
 			prev[next.first] = current;//обновляем путь
-			int minim = find(card, next.first, finish, prev, visited, result);//рекурсия
+			int minim = find(card, next.first, finish, prev, visited, result, output);//рекурсия
 			if (minim > 0) {//если нашли путь
 				if (minim < result)//если меньше
 					result = minim;//то обновляем результат
@@ -132,13 +132,6 @@ int main() {
 	std::map<char, bool> visited;//проверка на посещение
 	int test = 0;
 	int flow = 0;
-	std::cout << std::endl;
-	while (test = find(card, start, finish, prev, visited, 0)) {//пока есть путь
-		std::cout << std::endl << "Minimal capacity: " << test << std::endl;//найденное минимальное ребро
-		flow += test;//максимальное значение
-		net(start, finish, prev, card, test);//обновляем показатели
-	}
-	std::cout << "No more ways." << std::endl;
 	menu = 0;
 	std::cout << std::endl << "How do you want to output?" << std::endl << std::endl
 		<< "Press 1 to output by console." << std::endl//выбор как вывести
@@ -146,6 +139,13 @@ int main() {
 	while (menu != 1 && menu != 2) {//пока не введется нужная цифра
 		std::cin >> menu;
 		if (menu == 1) {//вывод на консоль
+			std::cout << std::endl;
+			while (test = find(card, start, finish, prev, visited, 0, std::cout)) {//пока есть путь
+				std::cout << std::endl << "Minimal capacity: " << test << std::endl;//найденное минимальное ребро
+				flow += test;//максимальное значение
+				net(start, finish, prev, card, test, std::cout);//обновляем показатели
+			}
+			std::cout << "No more ways." << std::endl;
 			std::cout << std::endl << "Result: " << std::endl;
 			std::cout << flow << std::endl;
 			for (auto k : card) {
@@ -159,8 +159,15 @@ int main() {
 			file.open(output_way);
 			if (!file.is_open()) {
 				std::cout << "Can't open file!\n";
+				return 0;
 			}
-			file << "Result: " << std::endl;
+			while (test = find(card, start, finish, prev, visited, 0, file)) {//пока есть путь
+				file << std::endl << "Minimal capacity: " << test << std::endl;//найденное минимальное ребро
+				flow += test;//максимальное значение
+				net(start, finish, prev, card, test, file);//обновляем показатели
+			}
+			file << "No more ways." << std::endl;
+			file << std::endl << "Result: " << std::endl;
 			file << flow << std::endl;
 			for (auto k : card) {
 				std::sort(k.second.begin(), k.second.end(), cmp);
@@ -172,5 +179,6 @@ int main() {
 			std::cout << std::endl << "Wrong choice! Try again!" << std::endl;
 		}//а цикл продолжается
 	}
+
 	return 0;
 }
