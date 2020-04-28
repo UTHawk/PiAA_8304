@@ -18,15 +18,15 @@ void prefix(const std::string& S, std::vector<int>& n) {
 	}
 }
 
-void KMP(std::istream& input) {
+void KMP(std::istream& input, std::ostream& output) {
 	std::string P;
 	input >> P;//считываем шаблон
 	std::vector<int> n(P.size());//вектор для префикс функции
 	prefix(P, n);//вычисляем префикс функцию
-	std::cout << "Prefix: ";
+	output << "Prefix: ";
 	for (int j : n)
-		std::cout << j << " ";
-	std::cout << std::endl;
+		output << j << " ";
+	output << std::endl;
 	int k = 0;
 	int result = -1;//если нет совпадений, то резльтат останется -1
 	char vau = '0';
@@ -35,57 +35,33 @@ void KMP(std::istream& input) {
 	std::vector<int> ans;//ответ
 	int i = 0;
 	while (vau != '\n' && !input.eof()) {//пока не конец строки/файла
-		std::cout << "Changes when i = " << i << " Start value k = " << k << std::endl;
+		output << "Changes when i = " << i << " Start value k = " << k << std::endl;
 		while (k > 0 && vau != P[k]) {//пока не совпадут символы
 			k = n[k - 1];//сдвигаем
-			std::cout << " k = " << k << std::endl;
+			output << " k = " << k << std::endl;
 		}
 		if (vau == P[k]) {//если совпали
 			k += 1;//увеличиваем значение
-			std::cout << " k = " << k << std::endl;
+			output << " k = " << k << std::endl;
 		}
 		if (k == P.size()) {//если длина совпадений=длине строки
 			result = i - P.size() + 1;//значит ответ получен
 			ans.push_back(result);
-			std::cout << "-----------------------------------------------------" << std::endl;
-			std::cout << "Result found with i = " << i << " k = " << k 
+			output << "-----------------------------------------------------" << std::endl;
+			output << "Result found with i = " << i << " k = " << k 
 				<< " Index = " << result << std::endl;
-			std::cout << "-----------------------------------------------------" << std::endl;
+			output << "-----------------------------------------------------" << std::endl;
 		}
 		i += 1;
 		input.get(vau);
 	}
-	int menu = 0;
-	std::cout << std::endl << "How do you want to output?" << std::endl << std::endl
-		<< "Press 1 to output by console." << std::endl//выбор как вывести
-		<< "Press 2 to output into file." << std::endl;
-	while (menu != 1 && menu != 2) {//пока не введется нужная цифра
-		std::cin >> menu;
-		if (menu == 1) {//вывод на консоль
-			std::cout << std::endl << "Result: ";
-			if (!ans.empty())
-				for (unsigned long int i = 0; i < ans.size() - 1; ++i) {
-					std::cout << ans[i] << ",";
-				}
-			std::cout << result;
+
+	output << std::endl << "Result: ";
+	if (!ans.empty())
+		for (unsigned long int i = 0; i < ans.size() - 1; ++i) {
+			output << ans[i] << ",";
 		}
-		else if (menu == 2) {//вывод в файл
-			std::ofstream file;
-			file.open(output_way);
-			if (!file.is_open()) {
-				std::cout << "Can't open file!\n";
-			}
-			file << "Result: ";
-			if (!ans.empty())
-				for (unsigned long int i = 0; i < ans.size() - 1; ++i) {
-					file << ans[i] << ",";
-				}
-			file << result;
-		}
-		else {//если неверно введена цифра, выводится сообщение
-			std::cout << std::endl << "Wrong choice! Try again!" << std::endl;
-		}//а цикл продолжается
-	}
+	output << result;
 }
 
 
@@ -97,16 +73,56 @@ int main() {
 	while (menu != 1 && menu != 2) {//пока не введется нужная цифра
 		std::cin >> menu;
 		if (menu == 1) {//считывание с консоли
-			KMP(std::cin);
+			int menu = 0;
+			std::cout << std::endl << "How do you want to output?" << std::endl << std::endl
+				<< "Press 1 to output by console." << std::endl//выбор как вывести
+				<< "Press 2 to output into file." << std::endl;
+			while (menu != 1 && menu != 2) {//пока не введется нужная цифра
+				std::cin >> menu;
+				if (menu == 1) {//вывод на консоль
+					KMP(std::cin, std::cout);
+				}
+				else if (menu == 2) {//вывод в файл
+					std::ofstream fileout;
+					fileout.open(output_way);
+					if (!fileout.is_open()) {
+						std::cout << "Can't open file!\n";
+					}
+					KMP(std::cin, fileout);
+				}
+				else {//если неверно введена цифра, выводится сообщение
+					std::cout << std::endl << "Wrong choice! Try again!" << std::endl;
+				}//а цикл продолжается
+			}
 		}
 		else if (menu == 2) {//считывание из файла
-			std::ifstream file;
-			file.open(input_way);
-			if (!file.is_open()) {
+			std::ifstream filein;
+			filein.open(input_way);
+			if (!filein.is_open()) {
 				std::cout << "Can't open file!" << std::endl;
 				return 0;
 			}
-			KMP(file);
+			int menu = 0;
+			std::cout << std::endl << "How do you want to output?" << std::endl << std::endl
+				<< "Press 1 to output by console." << std::endl//выбор как вывести
+				<< "Press 2 to output into file." << std::endl;
+			while (menu != 1 && menu != 2) {//пока не введется нужная цифра
+				std::cin >> menu;
+				if (menu == 1) {//вывод на консоль
+					KMP(filein, std::cout);
+				}
+				else if (menu == 2) {//вывод в файл
+					std::ofstream fileout;
+					fileout.open(output_way);
+					if (!fileout.is_open()) {
+						std::cout << "Can't open file!\n";
+					}
+					KMP(filein, fileout);
+				}
+				else {//если неверно введена цифра, выводится сообщение
+					std::cout << std::endl << "Wrong choice! Try again!" << std::endl;
+				}//а цикл продолжается
+			}
 		}
 		else {//если неверно введена цифра, выводится сообщение
 			std::cout << std::endl << "Wrong choice! Try again!" << std::endl;
