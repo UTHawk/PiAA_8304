@@ -10,6 +10,8 @@
 #include <locale>
 #include <fstream>
 
+std::ostream* out;
+std::istream* in;
 
 std::string operator*(std::string s, size_t count){
 	std::string ret;
@@ -20,15 +22,22 @@ std::string operator*(std::string s, size_t count){
 	return ret;
 }
 
+bool comp(std::pair<int, int> v1, std::pair<int, int> v2) {
+
+	if ((abs(v1.first - v1.second)) == (abs(v2.first - v2.second))) {
+		return v1.first < v2.first;
+	}
+	return abs(v1.first - v1.second) < abs(v2.first - v2.second);
+}
 
 class Graph {
 
 	int source;
 	int drain;
 
-	std::vector<std::vector<std::pair<int, int>>> matrix;
-	//std::vector<std::vector<int>> lastDirection;
-	std::map<int, std::vector<std::pair<int, int>>> children;
+	std::vector<std::vector<std::pair<int, int>>> matrix; //first - capacity, second - current flow
+
+	std::map<int, std::vector<std::pair<int, int>>> children; // в паре first - вершина, second - родитель
 	std::vector<bool> visited;
 
 
@@ -88,81 +97,67 @@ public:
 			for (int j = 0; j < matrix[i].size(); j++) {
 				if (matrix[i][j].first > -1) {
 					if (matrix[j][i].first > -1 && matrix[i][j].second > 0 && matrix[j][i].second > 0) {
-						int min = std::min(matrix[i][j].first, matrix[j][i].first);
+						int min = std::min(matrix[i][j].second, matrix[j][i].second);
 						matrix[i][j].second -= min;
 						matrix[j][i].second -= min;
 					}
-					std::cout << (char)(i + 97) << " " << (char)(j + 97) << " " << matrix[i][j].second << "\n"; // a = 97
+					if (matrix[i][j].second < 0)
+						matrix[i][j].second -= matrix[i][j].second;
+					if (matrix[j][i].second < 0)
+						matrix[j][i].second -= matrix[j][i].second;
+
+					*out << (char)(i + 97) << " " << (char)(j + 97) << " " << matrix[i][j].second << "\n"; // a = 97
 				}
 					
 			}
 		}
 	}
-	bool isDoubleEdge(int v1, int v2) {//проверяет является ли ребро двойным, и идет ли сейчас проход назад
-		if (matrix[v1][v2].first > -1 && matrix[v2][v1].first > -1) {
-			if (v1 > v2) {//ребро обратное
-				return true;
-			}
-			return false;
-		}
-		else return false;
-	}
-	int dfs(int vertex, int min, int depth) {         // min — пропускная способность в текущем подпотоке
+
+
+
+	int search(int vertex, int min, int depth) {
+
 		std::string space = " ";
-		space = space*depth;
-		//std::cout << space << "Текущая вершина: " << (char)(vertex+97) << "\n";
+		space = space * depth;
+		*out << space << "Текущая вершина: " << (char)(vertex+97) << "\n";
 		if (vertex == drain)
 			return min;
 
+		std::sort(children[vertex].begin(), children[vertex].end(), comp); //сортируем для выбора вершин соответственно правилу
 		visited[vertex] = true;
-		for (int j = 0; j < children[vertex].size(); j++) {
-			int i = children[vertex][j].first;
-			//std::cout << space << "Ребенок: " << (char)(i + 97) << "\n";
-			if ((matrix[vertex][i].first > -1) && !visited[i] && (matrix[vertex][i].second < matrix[vertex][i].first) /*&& !isDoubleEdge(vertex, i)*/) {
-				//std::cout << space << "Поиск пути" << "\n";
-				int delta = dfs(i, std::min(min, matrix[vertex][i].first - matrix[vertex][i].second), depth + 1);
+
+		for (auto& next : children[vertex]) {
+			
+			if ((!visited[next.first]) && (matrix[vertex][next.first].second < matrix[vertex][next.first].first)) {//если не посещена и осталась вместимость
+
+				int delta = search(next.first, std::min(min, matrix[vertex][next.first].first - matrix[vertex][next.first].second), depth + 1);
 				if (delta > 0) {
-					//std::cout << space << "Найденный путь: "<< delta << "\n";
-					matrix[vertex][i].second += delta;
-					//if (matrix[i][vertex].first > -1 ) {
-					//	matrix[i][vertex].second -= delta;
-					//}
+					*out << space << "Найденный путь: "<< delta << "\n";
+					matrix[vertex][next.first].second += delta;
+					if (matrix[next.first][vertex].first > -1 ) { //обратное ребро
+						matrix[next.first][vertex].second -= delta;
+					}
 					return delta;
 
 				}
-
 			}
-			//else if ((matrix[vertex][i].first > -1) && !visited[i] && isDoubleEdge(vertex, i) && matrix[i][vertex].second > 0) {
-			//	int delta = dfs(i, std::min(min, matrix[i][vertex].second));
-			//	if (delta > 0) {
 
-			//		matrix[i][vertex].second -= delta;
-
-			//		return delta;
-
-			//	}
-			//}
 		}
-		//for (int i = 0; i < matrix.size(); i++) {
-			
-		//}
+
 		return 0;
 	}
 
-	bool comp(std::pair<int, int> v1, std::pair<int, int> v2) {
-		return matrix[v1.second][v1.first] > matrix[v2.second][v2.first];
-	}
+
+
 
 	int maxFlow() {
 		int flow = 0;
 		int curFlow = 0;
-		
-
 	
-		for (int i = 0; i < matrix.size(); i++) {
-			std::sort(children[i].begin(), children[i].end(), [&, this](std::pair<int, int> v1, std::pair<int, int> v2) {return matrix[v1.second][v1.first] < matrix[v2.second][v2.first]; });
-		}
-		while ((curFlow = dfs(source, 999999, 0)) != 0) {
+		//for (int i = 0; i < matrix.size(); i++) {
+		//	std::sort(children[i].begin(), children[i].end(), [&, this](std::pair<int, int> v1, std::pair<int, int> v2) {return matrix[v1.second][v1.first] < matrix[v2.second][v2.first]; });
+		//}
+		while ((curFlow = search(source, 999999, 0)) != 0) { //пока есть путь
 			flow += curFlow;
 			curFlow = 0;
 			for (int i = 0; i < matrix.size(); i++) {
@@ -178,12 +173,26 @@ int main()
 {
 	setlocale(LC_ALL, "Russian");
 
+
 	char start = '\0';
 	char end = '\0';
 
 	int edges = 0;
-	std::cin >> edges;
-	std::cin >> start >> end;
+
+	int inputMode, outputMode;
+	std::cout << "Ввод из... (0 - из консоли, 1 - из файла): ";
+	std::cin >> inputMode;
+	std::cout << "Вывод из... (0 - из консоли, 1 - из файла): ";
+	std::cin >> outputMode;
+
+
+	std::ifstream inFile("input.txt");
+	std::ofstream outFile("output.txt");
+	in = inputMode == 0 ? &std::cin : &inFile;
+	out = outputMode == 0 ? &std::cout : &outFile;
+
+	*in >> edges;
+	*in >> start >> end;
 
 	char from = '\0';
 	char whereto = '\0';
@@ -191,14 +200,18 @@ int main()
 
 	Graph graph(start, end);
 	while (edges) {
-		std::cin >> from >> whereto >> weight;
+		*in >> from >> whereto >> weight;
 		graph.setNode(from, whereto, weight);
 		edges--;
 	}
 	//graph.printMatrix();
 	int flow = graph.maxFlow();
-	std::cout << flow << "\n";
+	*out << flow << "\n";
 	graph.printRealFlows();
+
+	inFile.close();
+	outFile.close();
+
 	return 0;
 }
 
