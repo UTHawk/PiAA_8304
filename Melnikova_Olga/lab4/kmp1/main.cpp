@@ -23,13 +23,13 @@ void KMP(std::istream& input, std::ostream& output){
     size_t counter = 0;
     input.get();
     input.get(tmp);
-    while(input.peek() != EOF && input.peek() != '\n'){
+    while(input.peek() != EOF && input.peek() != '\n'){ //Пока символы совпадают продолжаем сравнение
         while (str[j] == tmp) { output<<"Совпадение!!! Элемент шаблона: "<<str[j]<<"; Элемент текста: " << tmp<< std::endl; input.get(tmp); j++; counter++; }
-        if (j == str.length()){
+        if (j == str.length()){ //смотрим, равен ли счетчик , указывающий на шаблон длине шаблона
             output <<"\tВхождение найдено, индекс начала: " << counter - j << std::endl;
-            j = vectorPi[j-1];
+            j = vectorPi[j-1];// Сдвигаем j, чтобы избежать вложенностей
             is_result = true;
-        }else{
+        }else{ //Если же не равны и символ не первый, то сдвигаем на максимально возможный размер, указанный в массиве pi.
             if(j != 0) j = vectorPi[j-1];
             else input.get(tmp);
         }
