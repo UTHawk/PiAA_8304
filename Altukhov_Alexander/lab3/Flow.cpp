@@ -115,49 +115,143 @@ public:
 
 
 
-	int search(int vertex, int min, int depth) {
-
-		std::string space = " ";
-		space = space * depth;
-		*out << space << "Текущая вершина: " << (char)(vertex+97) << "\n";
-		if (vertex == drain)
-			return min;
-
-		std::sort(children[vertex].begin(), children[vertex].end(), comp); //сортируем для выбора вершин соответственно правилу
-		visited[vertex] = true;
-
-		for (auto& next : children[vertex]) {
-			
-			if ((!visited[next.first]) && (matrix[vertex][next.first].second < matrix[vertex][next.first].first)) {//если не посещена и осталась вместимость
-
-				int delta = search(next.first, std::min(min, matrix[vertex][next.first].first - matrix[vertex][next.first].second), depth + 1);
-				if (delta > 0) {
-					*out << space << "Найденный путь: "<< delta << "\n";
-					matrix[vertex][next.first].second += delta;
-					if (matrix[next.first][vertex].first > -1 ) { //обратное ребро
-						matrix[next.first][vertex].second -= delta;
-					}
-					return delta;
-
-				}
-			}
-
-		}
-
-		return 0;
+	int getDistance(int v1, int v2) {
+		return abs(v2 - v1);
 	}
 
+	int search() {
 
+		std::vector<int> vertexForSearch;
+		std::map<int, std::vector<std::pair<int, int>>> localChildren; //для восстановления пути
+		vertexForSearch.push_back(source);
+		visited[source] = true;
+
+		int curVertex = source;
+		if (curVertex == drain) {
+			return 0;
+		}
+
+
+		while (!vertexForSearch.empty()) {
+			int minDistance = 9999;
+			int ind1 = -1, ind2 = -1;
+
+			std::vector<int> toDelete;
+
+			for (int i = 0; i < vertexForSearch.size(); i++) { //поиск ребра соответствующего услови.
+				curVertex = vertexForSearch[i];
+				int timeToPop = true;
+				for (auto& next : children[curVertex]) {
+					if ((!visited[next.first]) && (matrix[curVertex][next.first].second < matrix[curVertex][next.first].first)) {
+
+						timeToPop = false;
+
+						int distance = getDistance(curVertex, next.first);
+						if (distance < minDistance) {
+							minDistance = distance;
+							ind1 = curVertex;
+							ind2 = next.first;
+						}
+						else if (distance == minDistance) {
+							if (ind2 > next.first) {
+								minDistance = distance;
+								ind1 = curVertex;
+								ind2 = next.first;
+							}
+						}
+					}
+				}
+
+				if (timeToPop) {
+					toDelete.push_back(i);
+				}
+
+			}
+
+			std::sort(toDelete.begin(), toDelete.end()); //удаляем вершины из которых не осталось путей
+			for (int i = 0; i < toDelete.size(); i++) {
+				auto it = vertexForSearch.begin();
+				std::advance(it, toDelete[i]);
+				vertexForSearch.erase(it);
+				for (int j = 0; j < toDelete.size(); j++) {
+					toDelete[j]--;
+				}
+			}
+			if (ind2 > -1) { //если нашли следующую вершину то добавляем ее
+
+				*out << "Проход по ребру: " << (char)(ind1 + 97) << "->" <<(char)(ind2 + 97) << "\n";
+
+				vertexForSearch.push_back(ind2);
+				visited[ind2] = true;
+				//localChildren[ind1].push_back({ ind2, ind1 });
+				localChildren[ind2].push_back({ ind1, ind2 });
+				curVertex = ind2;
+			}
+
+			if (curVertex == drain) { 
+				break;
+				//localChildren[drain].push_back({ ind1, ind2 });
+			}
+		}
+
+		if (curVertex != drain) {
+			*out << "Больше путей не найдено\n\n\n";
+			return 0;
+		}
+
+
+		//восстановление пути и вычисление минимального потока
+		std::stack<int> path;
+		path.push(curVertex);
+		int delta = 0;
+		std::pair<int, int> curPair = localChildren[drain][0];
+		curVertex = curPair.first;
+		path.push(curVertex);
+		delta = matrix[curVertex][drain].first - matrix[curVertex][drain].second;
+
+		while (curVertex != source) {
+			curPair = localChildren[curVertex][0];
+			//curVertex = curPair.first;
+			path.push(curPair.first);
+
+			delta = std::min(delta, matrix[curPair.first][curVertex].first - matrix[curPair.first][curVertex].second);
+			curVertex = curPair.first;
+		}
+
+		path.pop(); //исток
+		int v1 = source;
+		int v2 = -1;
+
+		*out << "\n\nНайденный путь: " << (char)(source + 97);
+		while (!path.empty()) {
+
+			*out << " -> " << (char)(path.top() + 97);
+			v2 = path.top();
+
+			matrix[v1][v2].second += delta;
+			if (matrix[v2][v1].first > -1) { //обратное ребро
+				matrix[v2][v1].second -= delta;
+			}
+			path.pop();
+
+			v1 = v2;
+		}
+		*out << "\nПоток: " << delta << "\n\n\n";
+
+		
+
+		return delta;
+
+
+	}
 
 
 	int maxFlow() {
 		int flow = 0;
 		int curFlow = 0;
 	
-		//for (int i = 0; i < matrix.size(); i++) {
-		//	std::sort(children[i].begin(), children[i].end(), [&, this](std::pair<int, int> v1, std::pair<int, int> v2) {return matrix[v1.second][v1.first] < matrix[v2.second][v2.first]; });
-		//}
-		while ((curFlow = search(source, 999999, 0)) != 0) { //пока есть путь
+
+		while((curFlow = search()) != 0){//пока есть путь
 			flow += curFlow;
 			curFlow = 0;
 			for (int i = 0; i < matrix.size(); i++) {
