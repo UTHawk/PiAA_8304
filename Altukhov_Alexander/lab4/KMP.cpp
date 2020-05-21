@@ -110,7 +110,7 @@ std::vector<int> parallelCMP(std::string& str, std::string& example) {
 
 	//поиск дополнительных результатов в случае объединения частей
 	for (int i = 0; i < results.size()-1; i++) {
-		std::cout << "СУФФИКСЫ::: " << suffixes[i] << "\n";
+
 		if (suffixes[i] > 0) {
 			*out << "Попытка найти новый результат в объединении частей " << i << " и " << i + 1 << "...";
 
@@ -158,13 +158,13 @@ int cyclicKMP(std::string& str, std::string& example) {
 
 void printKMPResults(std::vector<int>& result) {
 	if (result.empty()) {
-		std::cout << -1;
+		*out << -1;
 		return;
 	}
 	for (int i = 0; i < result.size(); i++) {
-		std::cout << result[i];
+		*out << result[i];
 		if (i != result.size() - 1) {
-			std::cout << ",";
+			*out << ",";
 		}
 	}
 }
