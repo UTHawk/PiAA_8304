@@ -1,7 +1,8 @@
-﻿#include <iostream>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <fstream>
 
 std::vector<size_t> get_prefix(std::string sample) {
 	std::vector<size_t> prefix(sample.length(), 0);
@@ -53,10 +54,47 @@ int KMPSearch(std::string text, std::string sample) {
 	return -1;
 }
 
-int main()
-{
-	std::string text = "ababab";
-	std::string sample = "bababa";
+void console_input() {
+
+	std::cout << "Please, Enter the text\n";
+
+	std::string text;
+	std::string sample;
+
+	std::cin >> text;
+
+	std::cout << "Please, Enter the sample\n";
+
+	std::cin >> sample;
 
 	std::cout << KMPSearch(text, sample);
+}
+
+void file_input(char*& argv) {
+	std::ifstream file;
+	std::string testfile = argv;
+	file.open(testfile);
+
+	if (!file.is_open()) {
+		std::cout << "Error! File isn't open" << std::endl;
+		return;
+	}
+
+	std::string text;
+	std::string sample;
+
+	while (!file.eof()) {
+		file >> text;
+		file >> sample;
+	}
+
+	std::cout << KMPSearch(text, sample);
+}
+
+int main(size_t argc, char** argv)
+{
+	if (argc == 1)
+		console_input();
+	else if (argc == 2)
+		file_input(argv[1]);
 }
