@@ -61,19 +61,35 @@ void console_input() {
 	std::string text;
 	std::string sample;
 
+	std::string out_file_name = "out.txt";
+	size_t result;
+
 	std::cin >> text;
 
 	std::cout << "Please, Enter the sample\n";
 
 	std::cin >> sample;
 
-	std::cout << KMPSearch(text, sample);
+	result = KMPSearch(text, sample);
+	std::cout << result << std::endl;
+
+	std::ofstream out_file;
+	out_file.open(out_file_name);
+
+	if (!out_file.is_open()) {
+		std::cout << "Error! Output file isn't open" << std::endl;
+	}
+
+	out_file << result << std::endl;
 }
 
 void file_input(char*& argv) {
 	std::ifstream file;
 	std::string testfile = argv;
 	file.open(testfile);
+
+	std::string out_file_name = "out.txt";
+	size_t result;
 
 	if (!file.is_open()) {
 		std::cout << "Error! File isn't open" << std::endl;
@@ -88,7 +104,17 @@ void file_input(char*& argv) {
 		file >> sample;
 	}
 
-	std::cout << KMPSearch(text, sample);
+	result = KMPSearch(text, sample);
+	std::cout << result << std::endl;
+
+	std::ofstream out_file;
+	out_file.open(out_file_name);
+
+	if (!out_file.is_open()) {
+		std::cout << "Error! Output file isn't open" << std::endl;
+	}
+
+	out_file << result << std::endl;
 }
 
 int main(size_t argc, char** argv)
