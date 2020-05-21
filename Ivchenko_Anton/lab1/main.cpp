@@ -2,6 +2,8 @@
 #include <vector>
 #include <ctime>
 #include <algorithm>
+#include <fstream>
+#include <math.h>
 
 using namespace std;
 
@@ -24,6 +26,8 @@ private:
 	vector <vector<Square>> variants;
 
 public:
+
+	int choice;
 
 	Matrix(int length, int count) :n(length), new_count(length* length), count(0){
 
@@ -102,7 +106,7 @@ public:
 
 	}
 
-	void backtracking()
+	void backtracking(std::ostream &out)
 	{
 
 		Square sq;
@@ -141,7 +145,7 @@ public:
 		
 
 		
-		while (count < new_count && !is_filled()) {
+		while ((count < new_count) && (!is_filled())) {
 
 				for (int y = 0; y < n; y++) {
 
@@ -165,21 +169,16 @@ public:
 					}
 				}
 
-				/*
-				for (int i = 0; i < n; i++)
-				{
-					for (int j = 0; j < n; j++)
-					{
-						std::cout << table[i][j] << "  ";
+				if (choice != 0) {
+					for (int i = 0; i < n; i++) {
+
+						for (int j = 0; j < n; j++) {
+							out << matrix[i][j] << "  ";
+						}
+						out << "\n";
 					}
-					std::cout << "\n";
+					out << "\n";
 				}
-				std::cout << "\n";
-				*/
-				
-				
-				
-				
 				
 				if (count < new_count)
 				{
@@ -257,7 +256,12 @@ int simplify(int size) {
 
 int main(){
 
-	int n;
+	int n, choice;
+
+	std::cout << "console: 0, console(debugging) : 1, file(debugging) :2 " << std::endl;
+	std::cin >> choice;
+
+
 	std::cin >> n;
 	int start_size = simplify(n);
 	Matrix matrix(start_size, 0);
@@ -301,10 +305,33 @@ int main(){
 
 	}
 
+	matrix.choice = choice;
 	srand(time(0));
-	matrix.backtracking();
-	matrix.print(kf);
-	cout << std::endl << "runtime = " << clock() / 1000.0 << endl; 
+
+	if (choice == 0){
+
+		matrix.backtracking(std::cout);
+		matrix.print(kf);
+		cout << std::endl << "runtime = " << clock() / 1000.0 << endl; 
+	}
+
+	else if (choice == 1) {
+
+		matrix.backtracking(std::cout);
+	}
+	else if (choice == 2){
+
+		std::ofstream file;
+		file.open("result.txt");
+
+		if (!file.is_open()) {
+			std::cout << "Incorrect!\n";
+			return 0;
+		}
+		matrix.backtracking(file);
+		
+	}
+
 
 	return 0;
 
