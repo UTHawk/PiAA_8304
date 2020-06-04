@@ -1,0 +1,10 @@
+Move right at 0 positions instead of 2
+Match at: 1 position
+Match at: 3 position
+Move right at 0 positions instead of 2
+Move right at 0 positions instead of 2
+Match at: 7 position
+Move right at 0 positions instead of 2
+Match at: 10 position
+Move right at 0 positions instead of 2
+
